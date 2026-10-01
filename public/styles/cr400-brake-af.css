@@ -1,0 +1,169 @@
+/* CR400AF 制动界面
+   设计坐标系 = 参考图自身像素 (1056x784)，由 .crk 整体映射到 1024x768。
+   位置/尺寸一律由 JS 用 MMI.box 给出（inline 定位），此处只管字体与配色。
+   所有渐变用「硬停靠」逐像素复刻参考图实测的明暗剖面。 */
+
+.crk {
+  width: 1056px;
+  height: 784px;
+  transform-origin: 0 0;
+  transform: scale(0.9696970, 0.9795918); /* 1024/1056, 768/784 */
+  background: #000;
+  color: #fff;
+  font-family: var(--font-hei);
+  overflow: hidden;
+}
+
+/* 中文标签用宋体（与参考图笔画粗细更接近），数字/拉丁用黑体 */
+.crk-rowlab, .crk-rtitle, .crk-lvl-label, .crk-lvl-unit,
+.crk-trainno, .crk-bbtn, .crk-rlbl {
+  font-family: var(--font-song);
+}
+
+.crk svg { display: block; }
+
+/* 参考图自身边缘过渡约 4~5px（偏软）：文字与图标做同量级轻微模糊，
+   线框 / 竖条等几何元素保持清晰。 */
+.crk-ico,
+.crk-date, .crk-time, .crk-num, .crk-unit, .crk-lvl-label, .crk-lvl-unit,
+.crk-trainno, .crk-pantono, .crk-carno, .crk-rowlab, .crk-rtitle, .crk-rlbl,
+.crk-bbtn {
+  filter: blur(1px);
+}
+
+/* ---------------- 顶栏 ---------------- */
+.crk-date,
+.crk-time,
+.crk-num,
+.crk-unit,
+.crk-lvl-label,
+.crk-lvl-unit {
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.crk-date { line-height: 40px; font-size: 38px; color: #ffffff; }
+.crk-time { line-height: 40px; font-size: 37px; color: #00ff00; }
+.crk-num  { line-height: 50px; font-size: 50px; text-align: center; color: #ffffff; }
+.crk-unit { line-height: 28px; font-size: 30px; text-align: center; color: #ffffff; }
+.crk-lvl-label { line-height: 44px; font-size: 26px; text-align: center; color: #ffff00; }
+.crk-lvl-unit  { line-height: 30px; font-size: 24px; text-align: center; color: #ffffff; }
+
+/* 顶栏下方“雕刻”分隔亮线 */
+.crk-sep {
+  background: linear-gradient(180deg,
+    #090909 0px 1px, #191919 1px 2px, #343434 2px 3px, #565658 3px 4px,
+    #77777d 4px 5px, #9898a3 5px 6px, #7c7c84 6px 7px, #424245 7px 8px,
+    #1f1f20 8px 9px, #060607 9px 10px);
+}
+
+/* ---------------- 中部线框 ---------------- */
+.crk-line.h1 {
+  background: linear-gradient(180deg,
+    #383838 0px 1px, #747474 1px 2px, #a1a3a1 2px 3px, #cdd0cc 3px 4px, #646565 4px 5px);
+}
+.crk-line.h2 {
+  background: linear-gradient(180deg,
+    #121212 0px 1px, #373737 1px 2px, #a9a9a9 2px 3px, #e9e9e9 3px 4px,
+    #8e8e8e 4px 5px, #424242 5px 6px, #1b1b1b 6px 7px);
+}
+.crk-line.h3 {
+  background: linear-gradient(180deg,
+    #09090a 0px 1px, #838483 1px 2px, #f1f3f1 2px 3px, #afb0af 3px 4px,
+    #6f6f6f 4px 5px, #333333 5px 6px);
+}
+.crk-line.v {
+  background: linear-gradient(90deg,
+    #121212 0px 1px, #2a2a2a 1px 2px, #7c7c7b 2px 3px, #dcddda 3px 4px,
+    #9b9c9a 4px 5px, #3b3b3a 5px 6px, #1a1a1a 6px 7px);
+}
+
+.crk-trainno { line-height: 28px; font-size: 26px; text-align: center; color: #ffffff; }
+.crk-pantono { line-height: 36px; font-size: 26px; text-align: center; color: #ffffff; }
+.crk-carno   { line-height: 30px; font-size: 25px; text-align: center; color: #ffffff; }
+
+/* ---------------- 左侧三行标签 ---------------- */
+.crk-rowlab { line-height: 26px; font-size: 25px; color: #ffffff; white-space: nowrap; }
+
+/* ---------------- 每节车厢的制动态 ---------------- */
+.crk-cell, .crk-bar { visibility: hidden; }
+.crk-cell.on, .crk-bar.on { visibility: visible; }
+.crk-bar.y {
+  background: linear-gradient(180deg,
+    #141414 0px 1px, #353535 1px 2px, #7a795f 2px 3px, #d5d38b 3px 4px,
+    #f7f665 4px 5px, #fdfd17 5px 6px, #ffff00 6px 24px, #d3d322 24px 25px,
+    #acab45 25px 26px, #a1a375 26px 27px, #8f9398 27px 28px, #424446 28px 29px,
+    #000000 29px 30px);
+}
+.crk-bar.b {
+  background: linear-gradient(180deg,
+    #373737 0px 1px, #888a8e 1px 2px, #9495cc 2px 3px, #4b49ec 3px 4px,
+    #1c19fd 4px 5px, #0908ff 5px 6px, #0000ff 6px 22px, #0505e9 22px 23px,
+    #0a0acf 23px 24px, #5555b9 24px 25px, #aaa9a4 25px 26px, #767568 26px 27px,
+    #333231 27px 28px, #191818 28px 29px);
+}
+.crk-bar.g {
+  background: linear-gradient(180deg,
+    #0b0b0b 0px 1px, #3c3e3b 1px 2px, #90978e 2px 3px, #8bcf89 3px 4px,
+    #45f144 4px 5px, #1dfe1d 5px 6px, #07ff07 6px 7px, #00ff00 7px 23px,
+    #01e601 23px 24px, #03cc03 24px 25px, #57bc58 25px 26px, #a9acaa 26px 27px,
+    #6f706f 27px 28px, #363535 28px 29px, #1a1919 29px 30px);
+}
+
+/* ---------------- 右侧总风管标尺 ---------------- */
+.crk-rline.l {
+  background: linear-gradient(90deg,
+    #121212 0px 1px, #3e3e3e 1px 2px, #5e5e5e 2px 3px, #6f6c70 3px 4px,
+    #5b595c 4px 5px, #1e1e1f 5px 6px);
+}
+.crk-rline.r {
+  background: linear-gradient(90deg,
+    #050505 0px 1px, #434343 1px 2px, #787878 2px 3px, #646464 3px 4px,
+    #4d4e4e 4px 5px, #232323 5px 6px);
+}
+.crk-rtick {
+  background: linear-gradient(90deg,
+    #050505 0px 1px, #434343 1px 2px, #787878 2px 3px, #646464 3px 4px,
+    #4d4e4e 4px 5px, #6b686c 5px 13px, #5c5d5c 13px 14px, #383837 14px 15px,
+    #171616 15px 16px, #090909 16px 17px);
+}
+.crk-rtick.top {
+  background: linear-gradient(180deg,
+    #131313 0px 1px, #4f4f4f 1px 2px, #787878 2px 3px, #818281 3px 4px,
+    #7e7f7d 4px 5px, #686767 5px 6px, #474647 6px 7px);
+}
+.crk-rcap {
+  background: linear-gradient(180deg,
+    #060606 0px 1px, #0e0e0e 1px 2px, #454747 2px 3px, #838687 3px 4px,
+    #4b4c4d 4px 5px, #070707 5px 6px);
+}
+.crk-rtitle { line-height: 33px; font-size: 25px; text-align: center; color: #ffffff; }
+.crk-rtitle .crk-pn { display: inline-block; width: 14px; }
+.crk-rlbl   { line-height: 24px; font-size: 25px; text-align: center; color: #ffffff; }
+
+/* ---------------- 底部按钮条 ---------------- */
+.crk-bottom { background: #000; }
+.crk-bband {
+  background: linear-gradient(180deg,
+    #111111 0px 1px, #373737 1px 2px, #5d5d5d 2px 3px, #858585 3px 4px,
+    #8f8f8f 4px 5px, #858585 5px 6px, #7c7c7c 6px 7px, #757575 7px 8px,
+    #6d6d6d 8px 9px, #666666 9px 10px, #5e5e5e 10px 11px, #555555 11px 12px,
+    #4f4f4f 12px 13px, #494949 13px 14px, #414141 14px 15px, #3a3a3a 15px 16px,
+    #323232 16px 17px, #2b2b2b 17px 18px, #232323 18px 19px, #1a1a1a 19px 20px,
+    #121212 20px 21px, #0a0a0a 21px 22px, #050505 22px 23px, #000000 23px 24px);
+}
+.crk-bsep {
+  background: linear-gradient(180deg,
+    rgba(0, 0, 0, 1) 0px 4px, rgba(0, 0, 0, 0.95) 4px 5px, rgba(0, 0, 0, 0.86) 5px 6px,
+    rgba(0, 0, 0, 0.7) 6px 7px, rgba(0, 0, 0, 0.51) 7px 8px, rgba(0, 0, 0, 0.36) 8px 9px,
+    rgba(0, 0, 0, 0.22) 9px 10px, rgba(0, 0, 0, 0.15) 10px 11px, rgba(0, 0, 0, 0.14) 11px 14px,
+    rgba(0, 0, 0, 0) 14px 24px);
+}
+.crk-bbtn {
+  line-height: 26px; font-size: 24px; text-align: center; color: #ffffff;
+  transform: scaleX(0.895); transform-origin: 50% 50%;
+}
+.crk-bedge {
+  background: linear-gradient(180deg,
+    #151516 0px 1px, #2e2e2f 1px 2px, #4e4e4f 2px 3px, #6f7070 3px 4px);
+}

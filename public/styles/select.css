@@ -1,0 +1,44 @@
+/* 启动 / 模式选择页 */
+.se {
+  width: 1024px; height: 768px;
+  background: radial-gradient(circle at 50% 12%, #07214a 0, #010031 62%, #00000f 100%);
+  color: #fff; font-family: var(--font-hei);
+}
+.se-title {
+  position: absolute; left: 0; top: 104px; width: 1024px; text-align: center;
+  font-family: var(--font-song); font-size: 46px; font-weight: 700; letter-spacing: 6px;
+  text-shadow: 0 2px 12px rgba(37, 151, 230, .6);
+}
+.se-sub {
+  position: absolute; left: 0; top: 168px; width: 1024px; text-align: center;
+  font-size: 17px; letter-spacing: 3px; color: #8fa6c8;
+}
+.se-line { position: absolute; left: 232px; top: 214px; width: 560px; height: 1px; background: #26456f; }
+.se-cards { position: absolute; left: 112px; top: 258px; width: 800px; height: 300px; }
+.se-card {
+  position: absolute; top: 0; width: 360px; height: 300px;
+  border: 1px solid #2f5a90; border-radius: 6px;
+  background: linear-gradient(#0a2a55, #041634);
+  cursor: pointer;
+}
+.se-card:hover { border-color: #62a8ee; background: linear-gradient(#0d3a72, #062044); }
+.se-card .cap {
+  position: absolute; left: 0; top: 22px; width: 360px; text-align: center;
+  font-family: var(--font-song); font-size: 26px; font-weight: 700; color: #dbe8f8;
+}
+.se-card .desc {
+  position: absolute; left: 0; top: 62px; width: 360px; text-align: center;
+  font-size: 14px; color: #7f9dc4; line-height: 22px;
+}
+.se-card .art { position: absolute; left: 20px; top: 116px; width: 320px; height: 150px; }
+.se-card .idx {
+  position: absolute; right: 12px; top: 8px; font-size: 13px; color: #4b74a6;
+}
+.se-foot {
+  position: absolute; left: 0; top: 596px; width: 1024px; text-align: center;
+  font-size: 14px; color: #6f8bb0; line-height: 26px;
+}
+.se-keys {
+  position: absolute; left: 112px; top: 664px; width: 800px; text-align: center;
+  font-size: 13px; color: #5877a0;
+}

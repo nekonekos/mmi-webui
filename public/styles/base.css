@@ -1,0 +1,65 @@
+/* ------------------------------------------------------------------
+   base.css — 固定 1024x768 舞台、字体、公共复位
+   非灵活布局：界面内部一律绝对定位，窗口变化只做整体等比缩放。
+   ------------------------------------------------------------------ */
+
+:root {
+  /* DB37/XXXX.4-2020 5.3 主要颜色定义推荐值 */
+  --c-white: #ffffff;
+  --c-black: #000c19;
+  --c-red: #bd0000;
+  --c-yellow: #fff200;
+  --c-lgray: #d4d4d4;
+  --c-green: #2d9033;
+  --c-orange: #ea9100;
+  --c-blue: #2597e6;
+
+  /* 地铁 MMI（图一）实测背景色 */
+  --metro-bg: #010031;
+
+  --font-song: SimSun, "宋体", "Songti SC", "Noto Serif CJK SC", serif;
+  --font-hei: SimHei, "黑体", "Heiti SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 舞台：固定 1024x768，由 stage.js 计算 translate + scale 居中，多余部分即黑边 */
+#stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1024px;
+  height: 768px;
+  transform-origin: 0 0;
+  background: #000;
+  overflow: hidden;
+}
+
+#screen { position: absolute; left: 0; top: 0; width: 1024px; height: 768px; }
+
+/* 每个界面以参考图的原始像素坐标为设计坐标，再整体映射到 1024x768 */
+.sheet {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  background: #000;
+}
+
+.abs { position: absolute; }
+
+.f-song { font-family: var(--font-song); }
+.f-hei  { font-family: var(--font-hei); }
+
+#sprite { position: absolute; left: 0; top: 0; width: 0; height: 0; overflow: hidden; }

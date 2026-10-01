@@ -1,0 +1,9 @@
+{
+  "name": "mmi-webui-tools",
+  "private": true,
+  "version": "1.0.0",
+  "description": "开发期校验工具（截图 + 与参考图逐像素比对），不参与 Cloudflare Pages 部署。",
+  "devDependencies": {
+    "puppeteer-core": "^23.11.1"
+  }
+}

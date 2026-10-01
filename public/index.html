@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1024, initial-scale=1">
+<title>轨道交通驾驶模拟人机交互显示屏</title>
+<link rel="icon" href="favicon.svg">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/select.css">
+<link rel="stylesheet" href="styles/metro-door.css">
+<link rel="stylesheet" href="styles/metro-main.css">
+<link rel="stylesheet" href="styles/cr400-run-bf.css">
+<link rel="stylesheet" href="styles/cr400-brake-af.css">
+<link rel="stylesheet" href="styles/cr400-run-af.css">
+</head>
+<body>
+  <div id="stage">
+    <div id="screen"></div>
+  </div>
+  <svg id="sprite" width="0" height="0" aria-hidden="true" focusable="false"></svg>
+
+  <script src="src/bus.js" defer></script>
+  <script src="src/stage.js" defer></script>
+  <script src="src/ui/icons.js" defer></script>
+  <script src="src/ui/widgets.js" defer></script>
+  <script src="src/sim/state.js" defer></script>
+  <script src="src/sim/auto-driver.js" defer></script>
+  <script src="src/sim/manual-driver.js" defer></script>
+  <script src="src/sim/loop.js" defer></script>
+  <script src="src/screens/select.js" defer></script>
+  <script src="src/screens/metro-door.js" defer></script>
+  <script src="src/screens/metro-main.js" defer></script>
+  <script src="src/screens/cr400-run-bf.js" defer></script>
+  <script src="src/screens/cr400-brake-af.js" defer></script>
+  <script src="src/screens/cr400-run-af.js" defer></script>
+  <script src="src/router.js" defer></script>
+</body>
+</html>

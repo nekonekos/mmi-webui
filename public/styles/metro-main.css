@@ -1,0 +1,83 @@
+﻿.mm {
+  width: 1024px;
+  height: 768px;
+  background: #000c19;
+  font-family: var(--font-hei);
+  color: #ffffff;
+  overflow: hidden;
+}
+
+/* 25 个主显示区（DB37/XXXX.4-2020 表1） */
+.mm .zone { position: absolute; }
+
+/* 1 区 超速报警及输出紧急制动 */
+.mm-z1 { left: 0;      top: 0;   width: 128px; height: 95px; }
+.mm-z2 { left: 0;      top: 95px;  width: 128px; height: 440px; }
+.mm-z3 { left: 128px;  top: 95px;  width: 542px; height: 440px; }
+.mm-z4 { left: 0;      top: 535px; width: 157px; height: 88px; }
+.mm-z5 { left: 157px;  top: 535px; width: 167px; height: 88px; }
+.mm-z6 { left: 324px;  top: 535px; width: 179px; height: 88px; }
+.mm-z7 { left: 503px;  top: 535px; width: 167px; height: 88px; }
+.mm-z8 { left: 128px;  top: 0;   width: 295px; height: 95px; }
+.mm-z9 { left: 423px;  top: 0;   width: 295px; height: 95px; }
+.mm-z10 { left: 718px; top: 0;   width: 306px; height: 95px; }
+.mm-z23 { left: 0;     top: 623px; width: 216px; height: 145px; }
+.mm-z24 { left: 216px; top: 623px; width: 439px; height: 145px; }
+.mm-z25 { left: 655px; top: 623px; width: 369px; height: 145px; }
+
+/* 11..22 区：右侧两列，每格 88px */
+.mm-zone-cell { position: absolute; width: 177px; height: 88px; }
+
+/* 通用文本 */
+.mm-txt { position: absolute; white-space: nowrap; }
+.mm-lab { font-family: var(--font-song); color: var(--c-lgray); }
+.mm-val { font-family: var(--font-hei); color: #ffffff; }
+
+/* 区标题与取值（8/9/10/23 区） */
+.mm-block { position: absolute; }
+.mm-block .cap {
+  position: absolute; left: 0; top: 0; width: 100%; height: 34px; line-height: 34px;
+  font-family: var(--font-song); font-size: 20px; color: var(--c-lgray);
+}
+.mm-block .big {
+  position: absolute; left: 0; top: 34px; width: 100%; height: 46px; line-height: 46px;
+  font-family: var(--font-hei); font-size: 34px; color: #ffffff; text-align: center;
+}
+
+/* 自定义区的按钮（规范 25 区由厂商自定义） */
+.mm-btn {
+  position: absolute; height: 44px; line-height: 42px; text-align: center;
+  font-family: var(--font-song); font-size: 22px; color: #d4d4d4;
+  background: #0a1a2c; border: 1px solid #4a5a6c; cursor: pointer;
+}
+.mm-btn:hover { background: #14293f; color: #ffffff; }
+
+/* 2 区 目标速度 / 目标距离 */
+.mm-tgt-axis { position: absolute; left: 58px; top: 14px; width: 1px; height: 400px; background: var(--c-lgray); }
+.mm-tgt-tick { position: absolute; left: 52px; width: 7px; height: 1px; background: var(--c-lgray); }
+.mm-tgt-lab {
+  position: absolute; left: 0; width: 48px; text-align: right;
+  font-family: var(--font-hei); font-size: 12px; color: var(--c-lgray);
+}
+.mm-tgt-bar { position: absolute; left: 63px; bottom: 26px; width: 15px; background: var(--c-green); }
+.mm-tgt-speed {
+  position: absolute; left: 0; top: 0; width: 128px; text-align: center;
+  font-family: var(--font-hei); font-size: 16px; color: #ffffff;
+}
+.mm-tgt-dist {
+  position: absolute; left: 0; top: 428px; width: 128px; text-align: center;
+  font-family: var(--font-hei); font-size: 10px; color: #ffffff;
+}
+.mm-dial { position: absolute; left: 194px; top: 104px; width: 411px; height: 411px; }
+
+/* 4/5/6/7 区（底部图标状态位） */
+.mm-slot { position: absolute; width: 4px; }
+
+/* 8/9/10/23 区文本 */
+.mm-line {
+  position: absolute; left: 0; width: 100%; height: 95px; line-height: 95px;
+  font-family: var(--font-song); font-size: 26px; color: #ffffff;
+}
+.mm-line.right { text-align: right; }
+.mm-line.center { text-align: center; }
+

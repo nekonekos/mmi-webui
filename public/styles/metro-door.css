@@ -1,0 +1,180 @@
+/* 图一 地铁 MMI —— 车门状态界面
+   设计坐标 = 参考图自身像素坐标 (1102x768)，由 .sheet 整体映射到 1024x768。
+   参考图系 1024x768 设计被横向拉伸至 1102，故 sx=1024/1102、sy=1 即是还原。 */
+
+.md {
+  width: 1102px;
+  height: 768px;
+  background: #010031;
+  transform-origin: 0 0;
+  transform: scale(0.9292196, 1);
+  font-family: var(--font-hei);
+  color: #fff;
+  overflow: hidden;
+}
+
+/* ---------------- 顶部状态栏 ---------------- */
+.md-top {
+  position: absolute;
+  left: 0; top: 0;
+  width: 1102px; height: 49px;
+  background: linear-gradient(#c7c7cb 0, #c7c7cb 1px, #a8a9ae 1px, #a8a9ae 47px, #86879a 47px, #86879a 49px);
+  color: #1a1a1a;
+}
+.md-top .vd {
+  position: absolute; top: 0; width: 2px; height: 49px;
+  background: #94959a;
+}
+.md-top .v1 { left: 304px; }
+.md-top .v2 { left: 716px; }
+.md-top .txt {
+  position: absolute; top: 0; height: 49px; line-height: 49px;
+  font-size: 21px; font-weight: 700;
+}
+.md-top .no    { left: 6px;  width: 298px; text-align: left; }
+.md-top .title { left: 306px; width: 410px; text-align: center; }
+.md-top .date  { left: 716px; width: 386px; text-align: right; padding-right: 13px;
+  letter-spacing: 2.6px; }
+
+/* ---------------- 始发 / 终点站条 ---------------- */
+.md-station { position: absolute; left: 0; top: 49px; width: 1102px; height: 48px; }
+.md-station span {
+  position: absolute; top: 0; height: 48px; line-height: 48px;
+  font-family: var(--font-song); font-size: 27px; font-weight: 700;
+}
+.md-station .from { left: 5px;  color: #6478e4; }
+.md-station .to   { right: 108px; color: #8a95ee; }
+
+.md-arrow {
+  position: absolute; left: 6px; top: 93px; width: 978px; height: 4px;
+  background: #86879d;
+}
+.md-arrow::after {
+  content: '';
+  position: absolute; right: -6px; top: -5px;
+  border-left: 14px solid #e3e4e7;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+}
+
+/* ---------------- 编组示意 ---------------- */
+.md-consist { position: absolute; left: 10px; top: 119px; width: 968px; height: 66px; }
+.md-consist .body {
+  position: absolute; left: 0; top: 0; width: 968px; height: 66px;
+  background: #c3c3c1;
+  border-radius: 16px;
+}
+.md-consist .band {
+  position: absolute; left: 8px; height: 17px;
+  background-image: repeating-linear-gradient(90deg,
+    #c4c4c2 0, #c4c4c2 16px, #333352 16px, #333352 19px);
+  background-position: 8px 0;
+}
+.md-consist .band.u { top: 3px; width: 952px; }
+.md-consist .band.l { top: 44px; width: 952px; }
+.md-consist .car {
+  position: absolute; top: 1px; height: 62px; width: 3px;
+  background: #2b2b58;
+}
+/* 参考图中编组图的上缘为一条深色顶线 */
+.md-consist .rib-t {
+  position: absolute; left: 2px; top: 0; width: 964px; height: 4px;
+  background: #2a2a45;
+}
+.md-consist .rib-b {
+  position: absolute; left: 6px; top: 63px; width: 956px; height: 3px;
+  background: #6f6f6d;
+}
+.md-consist .nose-r {
+  position: absolute; left: 947px; top: 19px; width: 22px; height: 22px;
+  border-radius: 50%; background: #3b3f45;
+}
+
+/* ---------------- 运行信息行 ---------------- */
+.md-info { position: absolute; left: 0; top: 213px; width: 1102px; height: 40px; }
+.md-info .lab {
+  position: absolute; top: 0; height: 40px; line-height: 40px;
+  font-family: var(--font-song); font-size: 21px; color: #ffffff;
+}
+.md-info .val {
+  position: absolute; top: 0; height: 40px; line-height: 40px;
+  font-family: var(--font-hei); font-size: 26px; font-weight: 700; color: #ffffff;
+  text-align: center;
+}
+
+/* ---------------- 牵引力竖条 ---------------- */
+.md-force { position: absolute; left: 121px; top: 324px; width: 26px; height: 204px;
+  border: 3px solid #9b1b00; background: #000; box-sizing: border-box; }
+.md-force .fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0; background: #00ff00; }
+.md-force .mid { position: absolute; left: 0; right: 0; top: 98px; height: 3px; background: #c02000; }
+.md-force-lab {
+  position: absolute; left: 58px; top: 410px; width: 40px; text-align: center;
+  font-family: var(--font-song); font-size: 26px; font-weight: 700; color: #ffffff;
+}
+.md-force-val {
+  position: absolute; left: 56px; top: 462px; width: 24px; text-align: center;
+  font-family: var(--font-hei); font-size: 24px; font-weight: 700; color: #00ff00;
+}
+.md-force-pct {
+  position: absolute; left: 96px; top: 462px; width: 26px; text-align: center;
+  font-family: var(--font-song); font-size: 24px; font-weight: 700; color: #ffffff;
+}
+
+/* ---------------- 12 格状态图标 ---------------- */
+.md-grid { position: absolute; left: 223px; top: 324px; width: 555px; height: 206px; }
+.md-cell {
+  position: absolute; width: 111px; height: 103px;
+  border: 2px solid #5a60a8;
+  background: transparent;
+}
+.md-cell svg { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #a3a3a3; }
+.md-cell.on {
+  background: linear-gradient(#b3b3f7 0, #9a9ade 28%, #43438c 68%, #1f1f5e 100%);
+  border-color: #b9b9e6;
+}
+.md-cell.on svg { color: #4a4a7a; }
+
+/* ---------------- 状态文字带 ---------------- */
+.md-sep1 { position: absolute; left: 0; top: 564px; width: 993px; height: 2px; background: #ffffff; }
+.md-sep2 { position: absolute; left: 0; top: 594px; width: 993px; height: 2px; background: #87879b; }
+.md-sep3 { position: absolute; left: 993px; top: 49px; width: 108px; height: 616px;
+  background: linear-gradient(90deg, #93979c, #ccced4); }
+.md-stat {
+  position: absolute; top: 566px; height: 28px; line-height: 28px;
+  font-family: var(--font-song); font-size: 22px; font-weight: 700; color: #ffffff;
+}
+.md-stat.a { left: 15px; }
+.md-stat.b { left: 417px; }
+.md-lower { position: absolute; left: 0; top: 596px; width: 993px; height: 72px; background: #00002a; }
+
+/* 侧栏分隔线 */
+.md-side-line { position: absolute; left: 993px; width: 108px; height: 2px; background: #8f9299; }
+.md-confirm {
+  position: absolute; left: 1013px; top: 596px; width: 70px; height: 44px;
+  background: linear-gradient(#e6e6e8, #b6b8bd);
+  border: 1px solid #8b8e94;
+  font-family: var(--font-song); font-size: 20px; font-weight: 700; color: #1a1a1a;
+  line-height: 42px; text-align: center;
+}
+
+/* ---------------- 底部按钮条 ---------------- */
+.md-bottom { position: absolute; left: 0; top: 668px; width: 1102px; height: 100px; }
+.md-btn {
+  position: absolute; top: 0; width: 110px; height: 100px;
+  background: linear-gradient(#8f9299 0, #a5a8af 22%, #c9cbd1 88%, #b2b4ba 100%);
+  border-left: 1px solid #6f7177;
+  border-right: 1px solid #d7d9de;
+  font-family: var(--font-hei); font-size: 22px; font-weight: 700; color: #16171a;
+  line-height: 98px; text-align: center; white-space: nowrap;
+}
+.md-btn.icon { line-height: 0; }
+.md-btn.icon svg { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #16171a; }
+.md-btn .lbl { letter-spacing: 1px; }
+.md-end { position: absolute; left: 991px; top: 0; width: 111px; height: 100px; background: #010031; }
+.md-home {
+  position: absolute; left: 997px; top: 672px; width: 99px; height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #8b9099 0%, #a8adb5 45%, #d2d5da 100%);
+  font-family: var(--font-hei); font-size: 20px; font-weight: 700; color: #16171a;
+  line-height: 88px; text-align: center;
+}

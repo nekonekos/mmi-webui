@@ -1,0 +1,98 @@
+﻿/* CR400BF0503 动车组「运行界面」—— 按参考图 materials/Picture1(1).png 逐像素复刻
+   设计坐标 = 参考图像素 (802x606)，由 .crb 整体映射到 1024x768。
+   界面内部一律绝对定位（MMI.box），不使用 flex / grid。 */
+
+.crb {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 802px;
+  height: 606px;
+  transform-origin: 0 0;
+  transform: scale(1.2768079, 1.2673267);
+  background: #000;
+  overflow: hidden;
+  font-family: Arial, Helvetica, "Liberation Sans", sans-serif;
+  color: #fff;
+}
+
+.crb .cb-dig { line-height: 1; white-space: pre; }
+.crb .cb-cn { line-height: 1; white-space: pre; font-family: var(--font-song); }
+
+/* ---------------- 顶栏 ---------------- */
+.cb-rule1 { background: #555555; }
+.cb-rule2 { background: #9c9ca8; }
+
+.cb-date { font-size: 26.5px; letter-spacing: 1.05px; }
+.cb-time { font-size: 26.5px; letter-spacing: 1.09px; color: #00ff00; }
+.cb-speed, .cb-level { font-size: 33.5px; }
+.cb-kmh { font-size: 19px; letter-spacing: 0.75px; }
+.cb-brk { font-size: 20px; color: #ffff00; }
+.cb-unit { font-size: 20px; color: #ffffff; }
+
+/* ---------------- 中部 ---------------- */
+.cb-trainno { font-size: 16.8px; color: #ffffff; }
+.cb-pantono { font-size: 21px; color: #ffffff; }
+.cb-line { background: #e0e0e0; }
+
+/* 左侧 网压 标尺 */
+.cb-rl-line { background: #ffffff; }
+.cb-rl-red { background: #bf0000; }
+.cb-rl-green { background: #009100; }
+.cb-rl-num { font-size: 21px; color: #ffffff; }
+
+/* 右侧 网流 标尺 */
+.cb-rr-line { background: #ffffff; }
+.cb-rr-num { font-size: 21px; color: #ffffff; }
+
+/* 四根竖柱 + 网格 */
+.cb-grid { background: #ffffff; }
+.cb-bar {
+  border: 1px solid #ffffff;
+  background: #000;
+  box-sizing: border-box;
+}
+.cb-bar-tick { background: #ffffff; }
+.cb-bar-tri {
+  background: #ff00ff;
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+}
+.cb-scalelbl { font-size: 17.5px; letter-spacing: -0.3px; color: #ffffff; }
+.cb-carno { font-size: 16.8px; letter-spacing: -0.5px; color: #ffffff; }
+.cb-bartop { font-size: 18.2px; letter-spacing: -0.5px; color: #ffffff; }
+
+/* ---------------- 底部图标位 ---------------- */
+.cb-ico svg { display: block; }
+
+/* ---------------- 底部按钮条 ---------------- */
+.cb-btop { background: #323232; }
+.cb-bgrad { background: linear-gradient(#969696, #0a0a0a); }
+.cb-bstripe {
+  background: linear-gradient(
+    to bottom,
+    #1a1a1a 0.26px,
+    #3a3a3a 1.05px,
+    #616161 1.83px,
+    #767676 2.62px,
+    #3d3d3d 3.41px,
+    #212121 4.20px,
+    #343434 4.99px,
+    #5f5f5f 5.78px,
+    #787878 6.57px,
+    #3a3a3a 7.36px,
+    #6f6f6f 8.15px,
+    #767676 8.94px,
+    #2a2a2a 9.73px,
+    #616161 10.52px,
+    #616161 11.2px);
+}
+.cb-bsep { background: #323232; }
+.cb-bwhite { background: #ffffff; }
+.cb-btxt {
+  font-family: var(--font-song);
+  font-size: 18px;
+  letter-spacing: -2px;
+  line-height: 1;
+  white-space: pre;
+  color: #ffffff;
+}
