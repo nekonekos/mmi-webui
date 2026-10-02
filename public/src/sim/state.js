@@ -5,16 +5,6 @@
 
   var MMI = global.MMI;
 
-  /* 各界面参考图中出现的时间，作为模拟时钟的起点，保证观感与参考图一致 */
-  var TIME_ORIGIN = { metro: '2016-03-30 12:49:54', cr400: '2016-03-02 13:04:08', cr400b: '2000-01-01 00:00:00' };
-
-  function clock(origin) {
-    var parts = origin.split(' ');
-    var d = parts[0].split('-');
-    var t = parts[1].split(':');
-    return new Date(+d[0], +d[1] - 1, +d[2], +t[0], +t[1], +t[2]);
-  }
-
   function createState() {
     var freeze = /(\?|&)freeze=1/.test(location.search);
 
@@ -23,7 +13,6 @@
 
       metro: {
         trainNo: '10301',
-        origin: clock(TIME_ORIGIN.metro),
         elapsed: 0,
 
         fromStation: '西三环站',
@@ -51,8 +40,7 @@
       },
 
       cr400: {
-        trainNo: 'CR400AF0207',
-        origin: clock(TIME_ORIGIN.cr400),
+        trainNo: 'CR400-AF-0003',
         elapsed: 0,
 
         speed: 290,          /* km/h */
@@ -113,6 +101,8 @@
   MMI.sim = {
     state: createState(),
     derive: derive,
+    /* 页面时间一律取浏览器系统时间（实时），不再使用模拟时钟 */
+    now: function () { return new Date(); },
     fmtDateTime: function (d) {
       return MMI.pad(d.getFullYear(), 4) + '-' + MMI.pad(d.getMonth() + 1, 2) + '-' + MMI.pad(d.getDate(), 2) +
         ' ' + MMI.pad(d.getHours(), 2) + ':' + MMI.pad(d.getMinutes(), 2) + ':' + MMI.pad(d.getSeconds(), 2);

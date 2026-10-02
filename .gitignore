@@ -1,6 +1,7 @@
 node_modules/
 tools/shots/
 tools/refs/
+tools/metrodoor_icons.json
 *.log
 .DS_Store
 Thumbs.db

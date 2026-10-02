@@ -67,8 +67,18 @@
     else if (manual.brake >= 1) manual.brake = 0;
   }
 
+  var lastSecond = -1;
+
   function frame(now) {
     requestAnimationFrame(frame);
+
+    /* 系统时钟：与车体模拟解耦，每秒派发一次（?freeze=1 亦不冻结） */
+    var sec = Math.floor(Date.now() / 1000);
+    if (sec !== lastSecond) {
+      lastSecond = sec;
+      MMI.bus.emit('clock:tick', MMI.sim.now());
+    }
+
     if (!sim.last) sim.last = now;
     var dt = (now - sim.last) / 1000;
     sim.last = now;

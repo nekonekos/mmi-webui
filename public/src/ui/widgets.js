@@ -81,6 +81,37 @@
       } };
   };
 
+  /* 逐像素提取的图标：def 形如 { w, h, c:[色], d:"y:x,w,级;x,w,级|..." }。
+     按行 run-length 还原成 SVG path（crispEdges），供各动车组界面复用。
+     outW/outH 为落地尺寸（设计坐标 px）；省略则用 def 自身尺寸。 */
+  MMI.buildIcon = function (def, outW, outH) {
+    var NS = 'http://www.w3.org/2000/svg';
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('width', outW == null ? def.w : outW);
+    svg.setAttribute('height', outH == null ? def.h : outH);
+    svg.setAttribute('viewBox', '0 0 ' + def.w + ' ' + def.h);
+    svg.setAttribute('shape-rendering', 'crispEdges');
+    var rows = def.d.split('|');
+    var acc = {};
+    for (var r = 0; r < rows.length; r++) {
+      var sep = rows[r].indexOf(':');
+      var y = rows[r].slice(0, sep);
+      var runs = rows[r].slice(sep + 1).split(';');
+      for (var i = 0; i < runs.length; i++) {
+        var p = runs[i].split(',');
+        var ci = +p[2] - 1;
+        (acc[ci] || (acc[ci] = [])).push('M' + p[0] + ' ' + y + 'h' + p[1] + 'v1h-' + p[1] + 'z');
+      }
+    }
+    for (var k in acc) {
+      var path = document.createElementNS(NS, 'path');
+      path.setAttribute('d', acc[k].join(''));
+      path.setAttribute('fill', def.c[k]);
+      svg.appendChild(path);
+    }
+    return svg;
+  };
+
   /* 状态指示灯（圆角方块，带色） */
   MMI.lamp = function (parent, left, top, w, h, color, radius) {
     var n = MMI.el('div', 'abs');

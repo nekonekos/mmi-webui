@@ -1,22 +1,57 @@
-/* 图一：地铁 MMI —— 车门状态界面 */
+/* 图一：地铁 MMI —— 车门状态界面
+   严格按参考图 materials/31a2832b-f536-4af6-850d-0cd60abc9a58.png 重写。
+   设计坐标 = 参考图自身像素 1102x768（由 .md 整体映射到 1024x768）；
+   按钮/图标为参考图 1:1 提取的 SVG（见 src/ui/metrodoor-icons.js，
+   由 tools/make_metrodoor_icons.py 生成）。 */
 (function (global) {
   'use strict';
 
   var MMI = global.MMI;
+  var NS = 'http://www.w3.org/2000/svg';
+  var IC = MMI.mdIcons;
+  var SX = IC.scale[0], SY = IC.scale[1];
 
-  var GRID = ['ac', 'panto', 'train', 'door', 'horn', 'brakeCyl', 'motor', 'fire', 'atc', 'dir'];
-  /* 每个图标的绘制外框尺寸，按参考图各自实测（参考图像素） */
-  var ICO_SIZE = [
-    [70, 60], [40, 70], [55, 66], [58, 60], [62, 70],
-    [70, 36], [54, 58], [58, 70], [58, 70], [62, 52]
-  ];
+  /* 参考图（ref）像素 -> 设计像素 */
+  function rx(v) { return v * SX; }
+  function ry(v) { return v * SY; }
 
-  var CAR_X = [0, 43, 42, 195, 346, 497, 648, 800, 951];
-  /* 车厢分隔线位置（相对编组左边界 x=10） */
-  var CAR_LINES = [185, 336, 487, 638, 790, 941];
-  var WIN_OFF = [42, 81, 119, 158];
+  /* 10 格状态图标（参考图实测为 5x2） */
+  var GRID = ['ac', 'panto', 'train', 'door', 'horn',
+              'brakeCyl', 'motor', 'fire', 'atc', 'dir'];
+
+  /* 底部按钮：9 格，前 3 格文字，4-7 图标，8 为红色状态图标 */
+  var BTN_TEXT = ['事件信息', '设置', '维护', '', '', '', '', '', ''];
+  var BTN_ICON = ['', '', '', '', 'btn-vol-down', 'btn-vol-up', 'btn-nav-left', 'btn-nav-right', 'btn-lang'];
+
+  var CELL_X = IC.cell.x, CELL_Y = IC.cell.y, CELL_W = IC.cell.w, CELL_H = IC.cell.h;
+  var BTN_X = IC.btn.x, BTN_Y = IC.btn.y, BTN_PITCH = IC.btn.pitch;
 
   var refs = null;
+
+  /* 参考图提取的图标 -> 绝对定位的 <svg>。own=true 用图标原色，否则跟随 currentColor */
+  function icon(name, own) {
+    var d = IC.icons[name];
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + d.w + ' ' + d.h);
+    svg.setAttribute('width', rx(d.w).toFixed(2));
+    svg.setAttribute('height', ry(d.h).toFixed(2));
+    svg.setAttribute('shape-rendering', 'crispEdges');
+    var p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', d.d);
+    p.setAttribute('fill', own ? d.c : 'currentColor');
+    svg.appendChild(p);
+    svg.style.position = 'absolute';
+    return svg;
+  }
+
+  /* 把图标放到原点（设计 px）的 (dx,dy)（参考图像素）处 */
+  function place(svg, originX, originY, dx, dy) {
+    svg.style.left = (originX + rx(dx)).toFixed(2) + 'px';
+    svg.style.top = (originY + ry(dy)).toFixed(2) + 'px';
+    return svg;
+  }
+
+  function lbl(t) { var n = MMI.el('span', 'lbl'); n.textContent = t; return n; }
 
   function mount(root) {
     var sheet = MMI.el('div', 'abs md');
@@ -33,12 +68,13 @@
     title.textContent = '车门状态';
 
     /* ---- 始发 / 终点站 ---- */
-    var st = MMI.box(sheet, 'station', 0, 49, 1102, 48);
-    var from = MMI.el('span', 'from'); from.textContent = MMI.sim.state.metro.fromStation;
-    var to = MMI.el('span', 'to'); to.textContent = MMI.sim.state.metro.toStation;
-    from.style.left = '5px'; from.style.color = '#6478e4';
-    to.style.right = '108px'; to.style.color = '#8a95ee';
-    st.appendChild(from); st.appendChild(to);
+    var st = MMI.box(sheet, 'md-station', 0, 49, 1102, 48);
+    var from = MMI.el('span', 'from');
+    var to = MMI.el('span', 'to');
+    from.textContent = MMI.sim.state.metro.fromStation;
+    to.textContent = MMI.sim.state.metro.toStation;
+    st.appendChild(from);
+    st.appendChild(to);
     MMI.box(sheet, 'md-arrow', 6, 93, 978, 4);
 
     /* ---- 编组 ---- */
@@ -48,13 +84,15 @@
     MMI.box(consist, 'rib-b', 6, 63, 956, 3);
     MMI.box(consist, 'band u', 8, 3, 952, 17);
     MMI.box(consist, 'band l', 8, 44, 952, 17);
-    for (var c = 0; c < CAR_LINES.length; c++) MMI.box(consist, 'car', CAR_LINES[c], 1, 3, 62);
+    [185, 336, 487, 638, 790, 941].forEach(function (x) {
+      MMI.box(consist, 'car', x, 1, 3, 62);
+    });
     MMI.box(consist, 'nose-r', 947, 19, 22, 22);
 
     /* ---- 运行信息行 ---- */
     var info = MMI.box(sheet, 'md-info', 0, 213, 1102, 40);
     function lab(x, t, w) { var n = MMI.box(info, 'lab', x, 0, w == null ? 120 : w, 40); n.textContent = t; return n; }
-    function val(x, w, cls) { return MMI.box(info, 'val' + (cls ? ' ' + cls : ''), x, 0, w, 40); }
+    function val(x, w) { return MMI.box(info, 'val', x, 0, w, 40); }
     lab(100, '速度', 40);
     var vSpeed = val(170, 60);
     lab(246, '公里/小时', 110);
@@ -73,27 +111,25 @@
     var fLab = MMI.box(sheet, 'md-force-lab', 68, 400, 46);
     fLab.textContent = '力';
     var fVal = MMI.box(sheet, 'md-force-val', 62, 448, 40);
-    var fPct = MMI.box(sheet, 'md-force-pct', 106, 448, 32);
-    fPct.textContent = '%';
+    MMI.box(sheet, 'md-force-pct', 106, 448, 32).textContent = '%';
 
-    /* ---- 12 格状态图标 ---- */
-    var grid = MMI.box(sheet, 'md-grid', 223, 324, 555, 206);
-    var cells = [];
+    /* ---- 10 格状态图标（参考图 1:1 提取） ---- */
+    var cells = {};
     for (var g = 0; g < GRID.length; g++) {
-      var cell = MMI.el('div', 'md-cell');
-      cell.style.left = (g % 5) * 111 + 'px';
-      cell.style.top = Math.floor(g / 5) * 103 + 'px';
-      cell.appendChild(MMI.icon(GRID[g], ICO_SIZE[g][0], ICO_SIZE[g][1]));
-      grid.appendChild(cell);
-      cells.push(cell);
+      var col = g % 5, row = Math.floor(g / 5);
+      var ox = rx(CELL_X + col * CELL_W), oy = ry(CELL_Y + row * CELL_H);
+      var cell = MMI.box(sheet, 'md-cell', ox, oy, rx(CELL_W), ry(CELL_H));
+      var d = IC.icons['grid-' + GRID[g]];
+      cell.appendChild(place(icon('grid-' + GRID[g], false), ox, oy, d.dx, d.dy));
+      cells[GRID[g]] = cell;
     }
 
     /* ---- 状态文字与分隔 ---- */
     MMI.box(sheet, 'md-sep1', 0, 564, 993, 2);
     MMI.box(sheet, 'md-lower', 0, 596, 993, 72);
     MMI.box(sheet, 'md-sep2', 0, 594, 993, 2);
-    var statA = MMI.box(sheet, 'md-stat a', 15, 566, 200, 28);
-    var statB = MMI.box(sheet, 'md-stat b', 417, 566, 200, 28);
+    MMI.box(sheet, 'md-stat a', 15, 566, 200, 28).textContent = '保护人工';
+    MMI.box(sheet, 'md-stat b', 417, 566, 200, 28).textContent = '停车制动';
 
     /* ---- 侧栏 ---- */
     MMI.box(sheet, 'md-sep3', 993, 49, 108, 616);
@@ -103,70 +139,73 @@
     var confirm = MMI.box(sheet, 'md-confirm', 1013, 596, 70, 44);
     confirm.textContent = '确认';
 
-    /* ---- 底部按钮条 ---- */
-    var bottom = MMI.box(sheet, 'md-bottom', 0, 668, 1102, 100);
-    var CELLW = 110.1;
+    /* ---- 底部按钮条（9 格） ---- */
+    var bottom = MMI.box(sheet, 'md-bottom', 0, ry(BTN_Y), 1102, ry(535 - BTN_Y));
     var buttons = [];
     for (var bi = 0; bi < 9; bi++) {
-      buttons.push(MMI.box(bottom, 'md-btn', Math.round(bi * CELLW), 0, Math.round(CELLW), 100));
+      var bx = rx(BTN_X) + bi * rx(BTN_PITCH);
+      var b = MMI.box(bottom, 'md-btn', bx, 0, rx(BTN_PITCH), ry(535 - BTN_Y));
+      if (BTN_TEXT[bi]) {
+        b.appendChild(lbl(BTN_TEXT[bi]));
+      } else if (BTN_ICON[bi]) {
+        b.className = 'md-btn icon';
+        var dd = IC.icons[BTN_ICON[bi]];
+        b.appendChild(place(icon(BTN_ICON[bi], true), 0, 0, dd.dx, dd.dy));
+      }
+      buttons.push(b);
     }
-    function btn(i, cls) {
-      if (cls) buttons[i].className = 'md-btn ' + cls;
-      return buttons[i];
-    }
-    btn(0).appendChild(lbl('事件信息'));
-    btn(1).appendChild(lbl('设置'));
-    btn(2).appendChild(lbl('维护'));
-    /* 索引 3 为空白按钮 */
-    var bVolD = btn(4, 'icon'); bVolD.appendChild(MMI.icon('volDown', 34, 22));
-    var bVolU = btn(5, 'icon'); bVolU.appendChild(MMI.icon('volUp', 34, 22));
-    var bNavL = btn(6, 'icon'); bNavL.appendChild(MMI.icon('navLeft', 30, 22));
-    var bNavR = btn(7, 'icon'); bNavR.appendChild(MMI.icon('navRight', 30, 22));
-    /* 索引 8 为语言切换按钮：保留位置，内部留空、无功能 */
 
+    /* ---- 主页圆钮 ---- */
     var home = MMI.el('div', 'abs md-home');
     home.textContent = '主页';
+    home.style.left = '996px';
+    home.style.top = '672px';
     sheet.appendChild(home);
-    home.style.left = '997px'; home.style.top = '672px';
-
-    function lbl(t) { var n = MMI.el('span', 'lbl'); n.textContent = t; return n; }
 
     /* ---- 交互 ---- */
     confirm.addEventListener('click', function () { MMI.sim.state.metro.confirm = true; });
-    bNavL.addEventListener('click', function () { MMI.bus.emit('nav:step', -1); });
-    bNavR.addEventListener('click', function () { MMI.bus.emit('nav:step', 1); });
+    buttons[6].addEventListener('click', function () { MMI.bus.emit('nav:step', -1); });
+    buttons[7].addEventListener('click', function () { MMI.bus.emit('nav:step', 1); });
     home.addEventListener('click', function () { location.hash = '#/select'; });
-    btn(2).addEventListener('click', function () { location.hash = '#/metro-main'; });
+    buttons[2].addEventListener('click', function () { location.hash = '#/metro-main'; });
 
     refs = {
       date: date, vSpeed: vSpeed, vBrake: vBrake, vVolt: vVolt,
-      cell3: cells[3], cell7: cells[7]
+      forceFill: forceFill, fVal: fVal,
+      cellDoor: cells.door
     };
 
     MMI.bus.on('sim:tick', update);
+    MMI.bus.on('clock:tick', update);
     update();
   }
 
   function update() {
     if (!refs) return;
     var m = MMI.sim.state.metro;
-    var now = new Date(m.origin.getTime() + m.elapsed * 1000);
-    MMI.setText(refs.date, MMI.sim.fmtDateTime(now));
+    MMI.setText(refs.date, MMI.sim.fmtDateTime(MMI.sim.now()));
     MMI.setText(refs.vSpeed, Math.round(m.speed));
     MMI.setText(refs.vBrake, m.brakePressure.toFixed(1));
     MMI.setText(refs.vVolt, Math.round(m.lineVoltage));
 
-    var cell = refs.cell3;
+    /* 牵引力竖条：中点为 0，向上牵引（绿）、向下制动（红） */
+    var eff = Math.max(-100, Math.min(100, m.effort));
+    var h = Math.round(98 * Math.abs(eff) / 100);
+    MMI.setStyle(refs.forceFill, 'height', h + 'px');
+    MMI.setStyle(refs.forceFill, 'bottom', eff >= 0 ? '101px' : (98 - h) + 'px');
+    MMI.setStyle(refs.forceFill, 'background', eff >= 0 ? '#00ff00' : '#ff0000');
+    MMI.setText(refs.fVal, eff.toFixed(0));
+
+    /* 车门图标随开门状态高亮 */
     var on = m.doorOpen;
-    if (cell.classList.contains('on') !== on) cell.classList.toggle('on', on);
-    if (refs.cell7) {
-      var on7 = m.icons[7] === 1;
-      if (refs.cell7.classList.contains('on') !== on7) refs.cell7.classList.toggle('on', on7);
+    if (refs.cellDoor.classList.contains('on') !== on) {
+      refs.cellDoor.classList.toggle('on', on);
     }
   }
 
   function unmount() {
     MMI.bus.off('sim:tick', update);
+    MMI.bus.off('clock:tick', update);
     refs = null;
   }
 

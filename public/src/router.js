@@ -10,8 +10,7 @@
     { id: 'metro-door',    title: '车门状态',   group: 'metro' },
     { id: 'metro-main',    title: '运行界面',   group: 'metro' },
     { id: 'cr400-run-bf',  title: '运行界面',   group: 'cr400' },
-    { id: 'cr400-brake-af', title: '制动界面',  group: 'cr400' },
-    { id: 'cr400-run-af',  title: '运行界面',   group: 'cr400' }
+    { id: 'cr400-brake-af', title: '制动界面',  group: 'cr400' }
   ];
   MMI.routes = ROUTES;
 

@@ -1,4 +1,4 @@
-/* CR400BF0503 中国标准动车组 —— 「运行界面」
+/* CR400-AF-0003 中国标准动车组 —— 「运行界面」
    按参考图 materials/Picture1(1).png (802x606) 逐像素复刻。
    设计坐标 = 参考图像素，由 .crb 整体映射到 1024x768；
    界面内部一律绝对定位（MMI.box），不使用 flex / grid。
@@ -13,9 +13,7 @@
   var SX = 1024 / 802, SY = 768 / 606;
 
   /* 参考图中的固定文字（state 内的车组号/时钟与参考图不一致，此处按参考图固定） */
-  var TRAIN_NO = 'CR400BF0503';
-  var DATE_TXT = '0000-00-00';
-  var TIME_TXT = '00:00:00';
+  var TRAIN_NO = 'CR400-AF-0003';
   var SPEED_TXT = '0';
   var LEVEL_TXT = '0';
   var PANTO_TAGS = ['06', '03'];
@@ -84,32 +82,8 @@ IC_BOXB: { x: 832, y: 124, w: 100, h: 31, c: ['#010101', '#080808', '#020202', '
 
   var refs = null;
 
-  function buildIcon(def) {
-    var svg = document.createElementNS(SVGNS, 'svg');
-    svg.setAttribute('width', def.w / SX);
-    svg.setAttribute('height', def.h / SY);
-    svg.setAttribute('viewBox', '0 0 ' + def.w + ' ' + def.h);
-    svg.setAttribute('shape-rendering', 'crispEdges');
-    var rows = def.d.split('|');
-    var acc = {};
-    for (var r = 0; r < rows.length; r++) {
-      var sep = rows[r].indexOf(':');
-      var y = rows[r].slice(0, sep);
-      var runs = rows[r].slice(sep + 1).split(';');
-      for (var i = 0; i < runs.length; i++) {
-        var p = runs[i].split(',');
-        var ci = +p[2] - 1;
-        (acc[ci] || (acc[ci] = [])).push('M' + p[0] + ' ' + y + 'h' + p[1] + 'v1h-' + p[1] + 'z');
-      }
-    }
-    for (var k in acc) {
-      var path = document.createElementNS(SVGNS, 'path');
-      path.setAttribute('d', acc[k].join(''));
-      path.setAttribute('fill', def.c[k]);
-      svg.appendChild(path);
-    }
-    return svg;
-  }
+  /* 复用 ui/widgets.js 的逐像素图标还原（本图 802x606，需除以 SX/SY） */
+  function buildIcon(def) { return MMI.buildIcon(def, def.w / SX, def.h / SY); }
 
   function icon(parent, name) {
     var def = ICONS[name];
@@ -133,8 +107,8 @@ IC_BOXB: { x: 832, y: 124, w: 100, h: 31, c: ['#010101', '#080808', '#020202', '
     MMI.box(sheet, 'cb-rule1', 0, 61, W, 2);
     MMI.box(sheet, 'cb-rule2', 0, 63, W, 2);
 
-    txt(sheet, 'cb-dig cb-date', 11.1, 17.75, DATE_TXT);
-    txt(sheet, 'cb-dig cb-time', 181.1, 18.1, TIME_TXT);
+    var dateTxt = txt(sheet, 'cb-dig cb-date', 11.1, 17.75, '');
+    var timeTxt = txt(sheet, 'cb-dig cb-time', 181.1, 18.1, '');
     txt(sheet, 'cb-dig cb-speed', 341.9, 12.6, SPEED_TXT);
     txt(sheet, 'cb-dig cb-kmh', 399.4, 20.8, 'km/h');
     txt(sheet, 'cb-cn cb-brk', 479.0, 23.0, '制动级位');
@@ -230,15 +204,19 @@ IC_BOXB: { x: 832, y: 124, w: 100, h: 31, c: ['#010101', '#080808', '#020202', '
     }
     MMI.box(sheet, 'cb-bwhite', 0, 602.7, W, 3.9);
 
-    refs = { pantoA: pantoA, pantoB: pantoB };
+    refs = { pantoA: pantoA, pantoB: pantoB, date: dateTxt, time: timeTxt };
 
     MMI.bus.on('sim:tick', update);
+    MMI.bus.on('clock:tick', update);
     update();
   }
 
   /* 参考图为未激活工况，表头保持参考图读数；受电弓位号随模拟状态显隐。 */
   function update() {
     if (!refs) return;
+    var d = MMI.sim.now();
+    MMI.setText(refs.date, MMI.sim.fmtDate(d));
+    MMI.setText(refs.time, MMI.sim.fmtTime(d));
     var c = MMI.sim.state.cr400;
     var a = c.panto06 !== false;
     var b = c.panto03 !== false;
@@ -248,6 +226,7 @@ IC_BOXB: { x: 832, y: 124, w: 100, h: 31, c: ['#010101', '#080808', '#020202', '
 
   function unmount() {
     MMI.bus.off('sim:tick', update);
+    MMI.bus.off('clock:tick', update);
     refs = null;
   }
 

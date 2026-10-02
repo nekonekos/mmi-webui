@@ -22,15 +22,6 @@
 
 .crk svg { display: block; }
 
-/* 参考图自身边缘过渡约 4~5px（偏软）：文字与图标做同量级轻微模糊，
-   线框 / 竖条等几何元素保持清晰。 */
-.crk-ico,
-.crk-date, .crk-time, .crk-num, .crk-unit, .crk-lvl-label, .crk-lvl-unit,
-.crk-trainno, .crk-pantono, .crk-carno, .crk-rowlab, .crk-rtitle, .crk-rlbl,
-.crk-bbtn {
-  filter: blur(1px);
-}
-
 /* ---------------- 顶栏 ---------------- */
 .crk-date,
 .crk-time,

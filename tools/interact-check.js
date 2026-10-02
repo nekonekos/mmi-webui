@@ -52,11 +52,11 @@ function check(name, ok, extra) {
   check('主页按钮 → 启动页', (await hash()) === '#/select', await hash());
 
   /* 键盘 ← → 切换 */
-  await go('#/cr400-run-af');
+  await go('#/cr400-run-bf');
   await page.keyboard.press('ArrowLeft');
   await new Promise(r => setTimeout(r, 200));
   const h1 = await hash();
-  check('← 在同一模式内切换', h1 !== '#/cr400-run-af' && h1.indexOf('#/cr400') === 0, h1);
+  check('← 在同一模式内切换', h1 !== '#/cr400-run-bf' && h1.indexOf('#/cr400') === 0, h1);
 
   /* 自动/手动切换 */
   await go('#/metro-door');

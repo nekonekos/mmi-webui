@@ -13,8 +13,7 @@ Pop-Location
 $pairs = @(
   @{ route = 'metro-door';     ref = 'materials\31a2832b-f536-4af6-850d-0cd60abc9a58.png' },
   @{ route = 'cr400-run-bf';   ref = 'materials\Picture1(1).png' },
-  @{ route = 'cr400-brake-af'; ref = 'materials\Snipaste_2026-05-02_17-54-23.png' },
-  @{ route = 'cr400-run-af';   ref = 'materials\Snipaste_2026-05-02_17-53-42.png' }
+  @{ route = 'cr400-brake-af'; ref = 'materials\Snipaste_2026-05-02_17-54-23.png' }
 )
 
 Write-Host '== 2/4 与参考图逐像素比对 ==' -ForegroundColor Cyan

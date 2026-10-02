@@ -28,6 +28,19 @@
 /* 11..22 区：右侧两列，每格 88px */
 .mm-zone-cell { position: absolute; width: 177px; height: 88px; }
 
+/* 各区图标（严格取自规范 PDF 图例，尺寸由 JS 适配） */
+.mm-ico { object-fit: contain; image-rendering: auto; }
+
+/* 23 区 时间显示 */
+.mm-time {
+  position: absolute; text-align: center;
+  font-family: var(--font-hei); font-size: 52px; line-height: 60px; color: #ffffff;
+}
+.mm-date {
+  position: absolute; text-align: center;
+  font-family: var(--font-song); font-size: 20px; line-height: 24px; color: var(--c-lgray);
+}
+
 /* 通用文本 */
 .mm-txt { position: absolute; white-space: nowrap; }
 .mm-lab { font-family: var(--font-song); color: var(--c-lgray); }

@@ -9,7 +9,7 @@ const ROOT = path.resolve(__dirname, '..');
 
 const ALL = [
   'select', 'metro-door', 'metro-main',
-  'cr400-run-bf', 'cr400-brake-af', 'cr400-run-af'
+  'cr400-run-bf', 'cr400-brake-af'
 ];
 
 (async () => {

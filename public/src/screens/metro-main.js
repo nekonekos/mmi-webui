@@ -1,6 +1,9 @@
 /* 地铁 MMI 主界面（25 个主显示区）
-   依据 DB37/XXXX.4-2020《城市轨道交通互联互通体系规范 信号系统 第4部分：车载人机界面》
-   表1 的分区尺寸与 5.3/5.4 的颜色与图例规定实现。 */
+   分区尺寸依据 DB37/XXXX.4-2020 表1（5.2 总体要求），颜色依据 5.3；
+   各区图标严格取自同规范 PDF（materials/1593313757438339.pdf）里
+   5.4 各表的图例图片，资产位于 public/assets/metro-main/（由
+   tools/extract_zone_icons.py 生成，清单见 assets/metro-main/manifest.js）。
+   某区状态为初始态时不显示图标，仅露出该区底色。 */
 (function (global) {
   'use strict';
 
@@ -19,12 +22,36 @@
   };
 
   var MAXSPEED = 160;      /* 表盘速度范围（工程可配置，最大 160km/h） */
-  var SWEEP = 310;         /* 0 到最大刻度的扇形弧度 */
-  var R_OUT = 204;         /* 红色边框半径 */
-  var R_TICK = 201;        /* 刻度外端 */
-  var R_LONG = 28, R_SHORT = 15, R_NUM = 162;
+  var SWEEP = 310;
+  var R_OUT = 204, R_TICK = 201, R_LONG = 28, R_SHORT = 15, R_NUM = 162;
 
   var SVGNS = 'http://www.w3.org/2000/svg';
+
+  /* 表1：区域编号 -> [x, y, w, h] */
+  var ZONES = {
+    1: [0, 0, 128, 95], 2: [0, 95, 128, 440], 3: [128, 95, 542, 440],
+    4: [0, 535, 157, 88], 5: [157, 535, 167, 88], 6: [324, 535, 179, 88], 7: [503, 535, 167, 88],
+    8: [128, 0, 295, 95], 9: [423, 0, 295, 95], 10: [718, 0, 306, 95],
+    23: [0, 623, 216, 145], 24: [216, 623, 439, 145], 25: [655, 623, 369, 145]
+  };
+  for (var zi = 0; zi < 12; zi++) {
+    ZONES[11 + zi] = [670 + (zi % 2) * 177, 95 + Math.floor(zi / 2) * 88, 177, 88];
+  }
+
+  /* 各单位区默认状态（key 对应 manifest 中的 key；'initial' = 不显示图标） */
+  var DEFAULT_STATE = {
+    1: 'initial', 4: 'coasting', 5: 'am-continuous', 6: 'integrity-ok',
+    7: 'headtail-comm-ok', 11: 'initial', 12: 'initial', 13: 'am-continuous',
+    14: 'forward', 15: 'initial', 16: 'in-stop-window', 17: 'allow-both',
+    18: 'initial', 19: 'auto-open-manual-close', 20: 'initial', 21: 'initial',
+    22: 'initial', 24: 'initial'
+  };
+
+  /* zone -> { key -> asset } */
+  var ASSETS = {};
+  (MMI.mmAssets || []).forEach(function (a) {
+    (ASSETS[a.zone] || (ASSETS[a.zone] = {}))[a.key] = a;
+  });
 
   function svgEl(tag, attrs) {
     var n = document.createElementNS(SVGNS, tag);
@@ -37,21 +64,16 @@
     return [cx + r * Math.sin(a), cy - r * Math.cos(a)];
   }
 
-  /* 速度 -> 表盘角度（-155° 为 0km/h，+155° 为最大速度） */
-  function speedAngle(v) {
-    return -SWEEP / 2 + (v / MAXSPEED) * SWEEP;
-  }
+  function speedAngle(v) { return -SWEEP / 2 + (v / MAXSPEED) * SWEEP; }
 
   function buildDial() {
     var cx = 205.5, cy = 205.5;
     var svg = svgEl('svg', { viewBox: '0 0 411 411', width: 411, height: 411 });
 
-    /* 沿着速度表盘外边界显示环形边框，红色，宽 3 像素，半径 204 */
     svg.appendChild(svgEl('circle', {
       cx: cx, cy: cy, r: R_OUT, fill: 'none', stroke: C.red, 'stroke-width': 3
     }));
 
-    /* 刻度：每 5km/h 一格；长刻度宽 3 长 28，短刻度宽 2 长 15，浅灰 */
     for (var v = 0; v <= MAXSPEED; v += 5) {
       var deg = speedAngle(v);
       var isLong = (v % 10 === 0);
@@ -78,7 +100,6 @@
       }
     }
 
-    /* km/h 文字位于底部缺口处，距中心半径 168 */
     var pk = polar(cx, cy, 168, 180);
     var kmh = svgEl('text', {
       x: pk[0], y: pk[1], fill: C.lgray, 'font-size': 20,
@@ -88,13 +109,11 @@
     kmh.textContent = 'km/h';
     svg.appendChild(kmh);
 
-    /* 推荐速度（黄色等边三角形，边长 15）与紧急制动干预速度（红色） */
     var triRec = svgEl('polygon', { points: '', fill: C.yellow });
     var triEbi = svgEl('polygon', { points: '', fill: C.red });
     svg.appendChild(triRec);
     svg.appendChild(triEbi);
 
-    /* 速度指针：指针 + 始端圆圈（半径 41），圆内以数字显示当前速度 */
     var needle = svgEl('line', {
       x1: cx, y1: cy, x2: cx, y2: cy - 165, stroke: C.white,
       'stroke-width': 4, 'stroke-linecap': 'round'
@@ -125,80 +144,59 @@
     return pts.join(' ');
   }
 
-  function iconSvg(inner, w, h, color) {
-    var box = MMI.el('div', 'abs');
-    box.innerHTML = '<svg viewBox="0 0 ' + w + ' ' + h + '" width="' + w + '" height="' + h +
-      '" style="color:' + color + '">' + inner + '</svg>';
-    return box;
-  }
-
-  var ICO = {
-    /* 1 区 超速报警及输出紧急制动 */
-    warn: function (color) {
-      return iconSvg('<path d="M59 6L112 76H6Z" fill="none" stroke="currentColor" stroke-width="5"/>' +
-        '<rect x="54" y="28" width="10" height="26" fill="currentColor"/>' +
-        '<rect x="54" y="60" width="10" height="10" fill="currentColor"/>', 118, 83, color);
-    },
-    /* 4 区 牵引制动状态 */
-    traction: function (color) {
-      return iconSvg('<circle cx="60" cy="41" r="33" fill="none" stroke="currentColor" stroke-width="4"/>' +
-        '<path d="M44 41h30M60 28l14 13-14 13" fill="none" stroke="currentColor" stroke-width="5"/>' +
-        '<text x="116" y="56" font-size="40" font-family="SimHei" fill="currentColor">B</text>', 139, 83, color);
-    },
-    coast: function (color) {
-      return iconSvg('<circle cx="60" cy="41" r="33" fill="none" stroke="currentColor" stroke-width="4"/>' +
-        '<path d="M42 41h36" fill="none" stroke="currentColor" stroke-width="5"/>', 139, 83, color);
-    },
-    brake: function (color) {
-      return iconSvg('<circle cx="60" cy="41" r="33" fill="none" stroke="currentColor" stroke-width="4"/>' +
-        '<rect x="42" y="35" width="36" height="12" fill="currentColor"/>', 139, 83, color);
-    },
-    /* 6 区 列车完整性 */
-    chain: function (color) {
-      return iconSvg('<rect x="8" y="22" width="34" height="38" rx="6" fill="none" stroke="currentColor" stroke-width="4"/>' +
-        '<rect x="54" y="22" width="34" height="38" rx="6" fill="none" stroke="currentColor" stroke-width="4"/>' +
-        '<path d="M42 41h12" stroke="currentColor" stroke-width="5"/>' +
-        '<rect x="102" y="22" width="66" height="38" rx="6" fill="none" stroke="currentColor" stroke-width="4"/>', 177, 83, color);
-    },
-    /* 7 区 列车头尾设备状态 */
-    dev: function (color) {
-      return iconSvg('<rect x="6" y="20" width="36" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>' +
-        '<rect x="52" y="20" width="36" height="42" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>', 94, 83, color);
-    },
-    generic: function (w, h, color) {
-      return iconSvg('<rect x="8" y="8" width="' + (w - 16) + '" height="' + (h - 16) +
-        '" fill="none" stroke="currentColor" stroke-width="3"/>', w, h, color);
-    }
-  };
-
-  /* 11..22 区（跳停、扣车 → 车辆段/停车场转换区） */
-  var CELLS = [
-    '跳停、扣车', '菜单按钮', '当前驾驶模式', '当前运行方向',
-    '折返状态', '列车进入停车窗', '门状态及门允许', '发车信息',
-    '客室门控制模式', '车辆及站台屏蔽门', '设备故障', '车辆段/停车场转换区'
-  ];
-
+  /* 各区图标层 */
+  var iconNodes = {};   /* zone -> <img> */
+  var zoneRect = {};    /* zone -> [x,y,w,h] */
   var refs = null;
+
+  function setState(zone, key) {
+    var node = iconNodes[zone];
+    if (!node) return;
+    if (node.__key === key) return;
+    node.__key = key;
+    var a = ASSETS[zone] && ASSETS[zone][key];
+    /* 初始态（或未取到该状态图片）：不显示图标，露出底色 */
+    if (!a || key === 'initial') {
+      node.style.display = 'none';
+      return;
+    }
+    var zr = zoneRect[zone];
+    var s = Math.min(zr[2] / a.w, zr[3] / a.h) * 0.98;
+    node.style.width = (a.w * s).toFixed(1) + 'px';
+    node.style.height = (a.h * s).toFixed(1) + 'px';
+    node.style.left = ((zr[2] - a.w * s) / 2).toFixed(1) + 'px';
+    node.style.top = ((zr[3] - a.h * s) / 2).toFixed(1) + 'px';
+    node.style.display = 'block';
+    if (node.getAttribute('src') !== 'assets/metro-main/' + a.file) {
+      node.setAttribute('src', 'assets/metro-main/' + a.file);
+    }
+  }
 
   function mount(root) {
     var s = MMI.el('div', 'abs mm');
     root.appendChild(s);
 
-    /* ===== 1 区 超速报警及输出紧急制动 128×95 ===== */
-    var z1 = MMI.box(s, 'zone mm-z1', 0, 0, 128, 95);
-    var z1ico = ICO.warn(C.lgray);
-    z1ico.style.left = '5px'; z1ico.style.top = '6px';
-    z1.appendChild(z1ico);
+    function zoneBox(id, cls) {
+      var z = ZONES[id];
+      zoneRect[id] = z;
+      var node = MMI.box(s, 'zone mm-z' + id + (cls ? ' ' + cls : ''), z[0], z[1], z[2], z[3]);
+      var img = MMI.el('img', 'mm-ico');
+      img.style.position = 'absolute';
+      img.style.display = 'none';
+      img.alt = '';
+      node.appendChild(img);
+      iconNodes[id] = img;
+      return node;
+    }
 
     /* ===== 2 区 目标速度及目标距离信息 128×440 ===== */
-    var z2 = MMI.box(s, 'zone mm-z2', 0, 95, 128, 440);
+    var z2 = zoneBox(2);
     MMI.box(z2, 'mm-tgt-axis', 58, 14, 1, 400);
     var scale = [750, 500, 300, 150, 0];
     for (var li = 0; li < scale.length; li++) {
       var ly = 14 + li * 100;
       MMI.box(z2, 'mm-tgt-tick', 52, ly, 7, 1);
-      var lab = MMI.box(z2, 'mm-tgt-lab', 0, ly - 8, 48, 16);
-      lab.textContent = scale[li];
+      MMI.box(z2, 'mm-tgt-lab', 0, ly - 8, 48, 16).textContent = scale[li];
     }
     var tgtBar = MMI.box(z2, 'mm-tgt-bar', 63, null, 15, 0);
     tgtBar.style.bottom = '26px';
@@ -206,81 +204,40 @@
     var tgtDist = MMI.box(z2, 'mm-tgt-dist', 0, 428, 128, 14);
 
     /* ===== 3 区 速度表盘 542×440 ===== */
-    var z3 = MMI.box(s, 'zone mm-z3', 128, 95, 542, 440);
+    var z3 = zoneBox(3);
     var dial = buildDial();
     dial.svg.style.position = 'absolute';
     dial.svg.style.left = '66px';
     dial.svg.style.top = '9px';
     z3.appendChild(dial.svg);
 
-    /* ===== 4 区 牵引制动状态显示 157×88 ===== */
-    var z4 = MMI.box(s, 'zone mm-z4', 0, 535, 157, 88);
-    var z4ico = ICO.coast(C.lgray);
-    z4ico.style.left = '9px'; z4ico.style.top = '3px';
-    z4.appendChild(z4ico);
+    /* ===== 8/9/10 区（文字） ===== */
+    zoneBox(8, 'mm-line center').textContent = '终点站：市体育中心站';
+    zoneBox(9, 'mm-line center').textContent = '下一站：西三环站';
+    var z10 = zoneBox(10, 'mm-line center');
+    z10.textContent = MMI.sim.state.metro.trainNo;
+    z10.style.fontSize = '40px';
 
-    /* ===== 5 区 最高可用驾驶模式显示 167×88 ===== */
-    var z5 = MMI.box(s, 'zone mm-z5', 157, 535, 167, 88);
-    var z5t = MMI.box(z5, 'mm-val', 0, 22, 167, 44);
-    z5t.style.fontSize = '26px';
-    z5t.style.textAlign = 'center';
-    z5t.textContent = 'AM 连续式';
-
-    /* ===== 6 区 列车完整性显示 179×88 ===== */
-    var z6 = MMI.box(s, 'zone mm-z6', 324, 535, 179, 88);
-    var z6ico = ICO.chain(C.green);
-    z6ico.style.left = '1px'; z6ico.style.top = '3px';
-    z6.appendChild(z6ico);
-
-    /* ===== 7 区 列车头尾设备状态显示 167×88 ===== */
-    var z7 = MMI.box(s, 'zone mm-z7', 503, 535, 167, 88);
-    var z7ico = ICO.dev(C.green);
-    z7ico.style.left = '36px'; z7ico.style.top = '3px';
-    z7.appendChild(z7ico);
-
-    /* ===== 8 区 终点站显示 295×95 ===== */
-    var z8t = MMI.box(s, 'zone mm-z8 mm-line center', 128, 0, 295, 95);
-    z8t.textContent = '终点站：市体育中心站';
-
-    /* ===== 9 区 下一站显示 295×95 ===== */
-    var z9t = MMI.box(s, 'zone mm-z9 mm-line center', 423, 0, 295, 95);
-    z9t.textContent = '下一站：西三环站';
-
-    /* ===== 10 区 车次显示 306×95 ===== */
-    var z10t = MMI.box(s, 'zone mm-z10 mm-line center', 718, 0, 306, 95);
-    z10t.style.fontSize = '40px';
-    z10t.textContent = MMI.sim.state.metro.trainNo;
+    /* ===== 1、4、5、6、7 区（图标） ===== */
+    [1, 4, 5, 6, 7].forEach(function (id) { zoneBox(id); });
 
     /* ===== 11..22 区（右侧两列，每格 177×88） ===== */
-    var cellNodes = [];
-    for (var i = 0; i < CELLS.length; i++) {
-      var col = i % 2, row = Math.floor(i / 2);
-      var cnode = MMI.box(s, 'zone mm-zone-cell', 670 + col * 177, 95 + row * 88, 177, 88);
-      var ico = ICO.generic(177, 83, C.lgray);
-      ico.style.left = '0'; ico.style.top = '0';
-      cnode.appendChild(ico);
-      var cap = MMI.box(cnode, 'mm-lab', 0, 36, 177, 20);
-      cap.style.fontSize = '15px';
-      cap.style.textAlign = 'center';
-      cap.textContent = CELLS[i];
-      cellNodes.push(cnode);
-    }
+    for (var i = 0; i < 12; i++) zoneBox(11 + i, 'mm-zone-cell');
 
-    /* ===== 23 区 时间显示 216×145 ===== */
-    var z23t = MMI.box(s, 'zone mm-z23 mm-val', 0, 623, 216, 145);
-    z23t.style.fontSize = '46px';
-    z23t.style.lineHeight = '145px';
-    z23t.style.textAlign = 'center';
+    /* ===== 23 区 时间显示 216×145（系统时间） ===== */
+    var z23 = zoneBox(23);
+    var z23t = MMI.box(z23, 'mm-time', 8, 44, 200, 60);
+    var z23d = MMI.box(z23, 'mm-date', 8, 106, 200, 24);
 
     /* ===== 24 区 自定义确认信息显示 439×145 ===== */
-    var z24 = MMI.box(s, 'zone mm-z24', 216, 623, 439, 145);
+    var z24 = zoneBox(24);
     var z24t = MMI.box(z24, 'mm-lab', 10, 52, 419, 40);
     z24t.style.fontSize = '24px';
     z24t.style.textAlign = 'center';
     z24t.textContent = '请确认前方信号开放';
 
     /* ===== 25 区 自定义显示 369×145（规范允许厂商自定义） ===== */
-    var z25 = MMI.box(s, 'zone mm-z25', 655, 623, 369, 145);
+    var z25 = zoneBox(25);
     var z25t = MMI.box(z25, 'mm-lab', 10, 14, 349, 30);
     z25t.style.fontSize = '18px';
     z25t.textContent = MMI.sim.state.metro.fromStation + ' → ' + MMI.sim.state.metro.toStation;
@@ -291,22 +248,23 @@
     help.textContent = '帮助信息';
     help.style.fontSize = '18px';
 
-    refs = {
-      z1: z1, z1ico: z1ico, dial: dial,
-      tgtBar: tgtBar, tgtSpeed: tgtSpeed, tgtDist: tgtDist,
-      z4ico: z4ico, z23t: z23t
-    };
+    /* 各图标区初始状态 */
+    for (var zid in DEFAULT_STATE) setState(zid, DEFAULT_STATE[zid]);
+
+    refs = { dial: dial, tgtBar: tgtBar, tgtSpeed: tgtSpeed, tgtDist: tgtDist, z23: z23t, z23d: z23d };
 
     MMI.bus.on('sim:tick', update);
+    MMI.bus.on('clock:tick', update);
     update();
   }
 
   function update() {
     if (!refs) return;
     var m = MMI.sim.state.metro;
-    var now = new Date(m.origin.getTime() + m.elapsed * 1000);
+    var now = MMI.sim.now();
 
-    MMI.setText(refs.z23t, MMI.sim.fmtTime(now));
+    MMI.setText(refs.z23, MMI.sim.fmtTime(now));
+    MMI.setText(refs.z23d, MMI.sim.fmtDate(now));
 
     /* 2 区：柱状光带按对数坐标映射，最高端 750m */
     var dist = 750;
@@ -329,25 +287,26 @@
     d.triRec.setAttribute('points', triangle(d.cx, d.cy, speedAngle(Math.min(MAXSPEED, m.speed + 20)), 15));
     d.triEbi.setAttribute('points', triangle(d.cx, d.cy, speedAngle(Math.min(MAXSPEED, m.speed + 40)), 15));
 
-    /* 1 区：初始（黑）/ 超过推荐速度（橙）/ 紧急制动触发（红） */
-    var bg = C.black, fg = C.lgray;
-    if (m.speed >= 80) { bg = C.red; fg = C.white; }
-    else if (m.speed >= 70) { bg = C.orange; fg = C.white; }
-    MMI.setStyle(refs.z1, 'background', bg);
-    refs.z1ico.firstChild.style.color = fg;
+    /* 1 区：超速报警（初始 / 超过推荐速度 / 紧急制动触发） */
+    var z1 = 'initial';
+    if (m.speed >= 80) z1 = 'emergency-trigger';
+    else if (m.speed >= 70) z1 = 'overspeed';
+    setState(1, z1);
 
     /* 4 区：牵引 / 惰行 / 制动 */
     var eff = m.effort;
-    var state = eff > 3 ? 'traction' : (eff < -3 ? 'brake' : 'coast');
-    var fresh = ICO[state](state === 'coast' ? C.lgray : C.white);
-    fresh.style.left = '9px'; fresh.style.top = '3px';
-    refs.z4ico.parentNode.replaceChild(fresh, refs.z4ico);
-    refs.z4ico = fresh;
+    setState(4, eff > 3 ? 'traction' : (eff < -3 ? 'braking' : 'coasting'));
+
+    /* 17 区：门状态及门允许命令 */
+    setState(17, m.doorOpen ? 'both-open' : 'allow-both');
   }
 
   function unmount() {
     MMI.bus.off('sim:tick', update);
+    MMI.bus.off('clock:tick', update);
     refs = null;
+    iconNodes = {};
+    zoneRect = {};
   }
 
   MMI.screens = MMI.screens || {};
